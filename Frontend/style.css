@@ -70,6 +70,44 @@ body {
     }
 }
 
+/* Toast Notifications - CSP-Friendly */
+.ks-toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    z-index: 10000;
+    max-width: 85%;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    animation: toastFadeInOut 3.5s ease forwards;
+}
+
+.ks-toast.success { background-color: var(--primary-green); }
+.ks-toast.error { background-color: #d32f2f; }
+.ks-toast.warning { background-color: var(--harvest-yellow); color: var(--charcoal); }
+.ks-toast.info { background-color: #1565c0; }
+
+#connectivity-indicator.online { color: var(--primary-green) !important; }
+#connectivity-indicator.offline { color: #d32f2f !important; }
+
+.shake-anim { animation: shake 0.3s ease; }
+
+@keyframes toastFadeInOut {
+    0% { opacity: 0; transform: translate(-50%, 20px); }
+    10% { opacity: 1; transform: translate(-50%, 0); }
+    90% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -20px); }
+}
+
+/* UI Utility Classes */
+.hidden { display: none !important; }
+.scale-active { transform: scale(1.1); }
+
 /* Splash Screen Specifics */
 .splash-flex {
     justify-content: center;

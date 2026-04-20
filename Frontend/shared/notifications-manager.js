@@ -1,5 +1,4 @@
-// Frontend/shared/notifications-manager.js
-import { supabase } from '../supabase-config.js';
+import { getSupabase } from '../supabase-config.js';
 
 /**
  * Universal Notification Manager (FR-7)
@@ -7,6 +6,7 @@ import { supabase } from '../supabase-config.js';
  */
 
 export async function initializeNotifications() {
+    const supabase = await getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -90,6 +90,7 @@ function injectNotificationBell() {
 }
 
 export async function updateUnreadBadge() {
+    const supabase = await getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -130,6 +131,7 @@ window.toggleNotificationPanel = async () => {
 };
 
 async function loadNotifications() {
+    const supabase = await getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
     const listContainer = document.getElementById('notif-list');
     
@@ -179,6 +181,7 @@ window.handleNotificationClick = async (id, title, type) => {
 };
 
 window.markAllRead = async () => {
+    const supabase = await getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
     await supabase.from('notifications').update({ read_status: true }).eq('user_id', user.id);
     await loadNotifications();
@@ -186,6 +189,7 @@ window.markAllRead = async () => {
 };
 
 window.markRead = async (id) => {
+    const supabase = await getSupabase();
     await supabase.from('notifications').update({ read_status: true }).eq('id', id);
     await loadNotifications();
     await updateUnreadBadge();
@@ -193,6 +197,7 @@ window.markRead = async (id) => {
 
 // Global function to trigger a system alert from other scripts
 export async function sendSystemNotification(userId, title, message, type = 'info') {
+    const supabase = await getSupabase();
     return await supabase.from('notifications').insert({
         user_id: userId,
         title,

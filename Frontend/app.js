@@ -281,11 +281,13 @@ function updateConnectivityStatus() {
 
     if (navigator.onLine) {
         indicator.textContent = '🟢 Online';
-        indicator.style.color = '#2e7d32';
-        syncPendingOfflineData(); // [Section 3.4] trigger sync on reconnect
+        indicator.classList.remove('offline');
+        indicator.classList.add('online');
+        syncPendingOfflineData(); 
     } else {
         indicator.textContent = '🔴 Offline';
-        indicator.style.color = '#d32f2f';
+        indicator.classList.remove('online');
+        indicator.classList.add('offline');
         showToast('You are offline. Data will sync when connected.', 'warning');
     }
 }
@@ -354,9 +356,9 @@ function initVoiceInterface() {
     if (!SpeechRecognition) {
         console.warn('[NFR-5.4] Voice interface not supported in this browser.');
         const voiceSection = document.querySelector('.voice-section');
-        if (voiceSection) voiceSection.style.display = 'none';
+        if (voiceSection) voiceSection.classList.add('hidden');
         const loginFab = document.getElementById('login-voice-btn');
-        if (loginFab) loginFab.style.display = 'none';
+        if (loginFab) loginFab.classList.add('hidden');
         return;
     }
 
@@ -628,16 +630,16 @@ function initVoiceInterface() {
 
     recognition.onspeechstart = function () {
         const btn = document.getElementById('voice-btn');
-        if (btn) btn.style.transform = 'scale(1.1)';
+        if (btn) btn.classList.add('scale-active');
         const loginBtn = document.getElementById('login-voice-btn');
-        if (loginBtn) loginBtn.style.transform = 'scale(1.1)';
+        if (loginBtn) loginBtn.classList.add('scale-active');
     };
 
     recognition.onspeechend = function () {
         const btn = document.getElementById('voice-btn');
-        if (btn) btn.style.transform = '';
+        if (btn) btn.classList.remove('scale-active');
         const loginBtn = document.getElementById('login-voice-btn');
-        if (loginBtn) loginBtn.style.transform = '';
+        if (loginBtn) loginBtn.classList.remove('scale-active');
     };
 
     console.log('[Voice] Initialized — en-IN, context-aware (language + login screens).');
@@ -874,8 +876,8 @@ async function handleLoginOTP() {
         // Visual shake feedback for wrong OTP
         const otpInputs = document.querySelector('.otp-inputs');
         if (otpInputs) {
-            otpInputs.style.animation = 'shake 0.3s ease';
-            setTimeout(() => otpInputs.style.animation = '', 300);
+            otpInputs.classList.add('shake-anim');
+            setTimeout(() => otpInputs.classList.remove('shake-anim'), 300);
         }
         return;
     }
