@@ -315,11 +315,21 @@ function goToScreen(screenId) {
 window.goToScreen = goToScreen;
 
 // ── Splash → Language after 2.5s ─────────────────────────────────────────────
-window.onload = () => {
-    updateConnectivityStatus(); // [Section 3.1] check connectivity on load
-    initVoiceInterface();       // [NFR-5.4] voice-first interface init
-    setTimeout(() => goToScreen('language-screen'), 2500);
-};
+// ── Splash → Language after 2.5s ─────────────────────────────────────────────
+// Initial setup
+updateConnectivityStatus(); 
+initVoiceInterface();
+
+// Transition from splash to language selection automatically
+setTimeout(() => {
+    goToScreen('language-screen');
+}, 2500);
+
+// Fallback for click-to-skip splash
+const splash = document.getElementById('splash-screen');
+if (splash) {
+    splash.addEventListener('click', () => goToScreen('language-screen'));
+}
 
 // ── [NFR-5.4] Voice-First Interface ──────────────────────────────────────────
 // SRS NFR-5.4: "80% of core functions accessible via voice commands"
@@ -930,6 +940,13 @@ window.moveToNext = moveToNext;
 
 // Wire up events in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Language Buttons ──────────────────────────────────────────────────
+    const engBtn = document.getElementById('english-lang-btn');
+    if (engBtn) engBtn.addEventListener('click', () => {
+        showToast('Language set to English', 'success');
+        // Stay on screen or transition logic
+    });
+
     // ── Navigation Buttons ───────────────────────────────────────────────
     const loginNav = document.getElementById('go-to-login-btn');
     if (loginNav) loginNav.addEventListener('click', () => goToScreen('login-screen'));
@@ -943,6 +960,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const otpVerify = document.getElementById('otp-verify-btn');
     if (otpVerify) otpVerify.addEventListener('click', handleLoginOTP);
+
+    // ── Voice Button ─────────────────────────────────────────────────────
+    const voiceBtn = document.getElementById('voice-btn');
+    if (voiceBtn) voiceBtn.addEventListener('click', () => {
+        if (typeof window.startVoiceLogin === 'function') {
+            window.startVoiceLogin();
+        }
+    });
 
     // ── Role Cards ───────────────────────────────────────────────────────
     document.querySelectorAll('.role-card').forEach(card => {
