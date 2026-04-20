@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KisanSetu | Payment Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/common.css">
+
+    <style>
+        /* Reusing global variables */
+        :root {
+            --primary-green: #2e7d32;
+            --charcoal: #37474f;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: var(--charcoal);
+        }
+
+        .header {
+            background: var(--primary-green);
+            color: var(--white);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Added to push mic to the right */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .payment-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ccc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-processing {
+            border-left-color: #fbc02d;
+        }
+
+        .status-settled {
+            border-left-color: var(--primary-green);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .escrow-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #eee;
+            font-weight: 600;
+        }
+
+        .btn-download {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f5e9;
+            color: var(--primary-green);
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Issue Modal Styles */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+        .modal-content {
+            background: white; border-radius: 16px; padding: 25px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 1.1rem; color: #d32f2f; margin:0; }
+        .close-btn { cursor: pointer; font-size: 1.2rem; color: #999; }
+        
+        textarea {
+            width: 100%; height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 12px; 
+            font-size: 0.9rem; margin-bottom: 20px; resize: none; font-family: inherit;
+        }
+        .btn-submit {
+            width: 100%; padding: 12px; background: #d32f2f; color: white; border: none;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    
+    <header class="header">
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="farmer_dashboard.html" class="back-btn" style="color: white; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2 style="font-size: 1.4rem; margin: 0;">Escrow & Payments</h2>
+        </div>
+
+        <button id="global-mic-icon" onclick="toggleGlobalVoice()" title="Tap to speak" style="background: white; color: #2e7d32; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); transition: transform 0.2s; flex-shrink: 0;">
+            <i class="fa-solid fa-microphone" style="font-size: 1.1rem;"></i>
+        </button>
+
+    </header>
+
+
+    <div class="container" id="payments-container">
+        <div style="text-align:center; padding: 50px 20px;" id="loading-view">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-green);"></i>
+            <p style="margin-top:15px;">Fetching your payment records...</p>
+        </div>
+    </div>
+
+    <!-- Dispute Modal -->
+    <div id="issue-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Raise Dispute</h3>
+                <span class="close-btn" onclick="window.closeIssueModal()">&times;</span>
+            </div>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">
+                Filing an issue for order <strong id="issue-order-id">#ID</strong>. 
+                Please explain the problem clearly (e.g. payment not received, incorrect amount).
+            </p>
+            <textarea id="issue-desc" placeholder="Describe the issue..."></textarea>
+            <button class="btn-submit" onclick="window.submitIssue()">Submit Dispute</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../shared/invoice_generator.js"></script>
+    <script src="../shared/toast.js"></script>
+    <script type="module" src="payment_status.js"></script>
+    <script src="../shared/global.js"></script>
+</body>
+
+</html>
