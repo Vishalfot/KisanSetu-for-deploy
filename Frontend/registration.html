@@ -60,7 +60,7 @@
                 <div class="input-wrapper">
                     <label>Profile Picture (प्रोफ़ाइल चित्र)</label>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="profileImage" accept="image/*" onchange="handleImageUpload(event)"
+                        <input type="file" id="profileImage" accept="image/*"
                             hidden>
 
                         <label for="profileImage" class="file-upload-label">
@@ -127,7 +127,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary" onclick="generatePreview()">Preview Details <i
+                <button type="button" id="preview-details-btn" class="btn-primary">Preview Details <i
                         class="fa-solid fa-arrow-right"></i></button>
             </form>
             <p class="login-link">Already have an account? <a href="index.html">Login here</a></p>
@@ -169,8 +169,8 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn-secondary" onclick="editForm()"><i class="fa-solid fa-pen"></i> Edit</button>
-                <button class="btn-accent" onclick="finalSubmit()"><i class="fa-solid fa-check-double"></i> Confirm &
+                <button id="edit-form-btn" class="btn-secondary"><i class="fa-solid fa-pen"></i> Edit</button>
+                <button id="confirm-submit-btn" class="btn-accent"><i class="fa-solid fa-check-double"></i> Confirm &
                     Submit</button>
             </div>
         </div>

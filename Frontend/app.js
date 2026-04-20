@@ -242,7 +242,7 @@ function moveToNext(current, nextFieldID) {
 //         Section 3.4 (SMS/USSD fallback, connectivity monitor)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { supabase } from './supabase-config.js';
+import { getSupabase } from './supabase-config.js';
 import { initializeNotifications, sendSystemNotification } from './shared/notifications-manager.js';
 
 import './toast.js'; // [Shared utility] Global toast notifications across all pages
@@ -253,12 +253,13 @@ const FAST2SMS_KEY = 'YOUR_FAST2SMS_API_KEY';
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes as per SRS NFR-5.3
 let sessionTimer = null;
 
-function startSessionTimer() {
+async function startSessionTimer() {
     clearTimeout(sessionTimer);
     sessionTimer = setTimeout(() => {
-        supabase.auth.signOut();
-        sessionStorage.clear();
-        showToast('Session expired due to inactivity. Please log in again.', 'warning');
+    sessionStorage.clear();
+    const supabase = await getSupabase();
+    await supabase.auth.signOut();
+    showToast('Session expired due to inactivity. Please log in again.', 'warning');
         setTimeout(() => goToScreen('login-screen'), 1500);
     }, SESSION_TIMEOUT_MS);
 }
@@ -784,7 +785,7 @@ async function handleLogin() {
 
     try {
         // Step 1a — Authenticate via Supabase Auth
-        // FR-1.7: Supabase stores passwords as bcrypt hashes — never plain text
+        const supabase = await getSupabase();
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -913,6 +914,7 @@ window.selectRole = selectRole;
 
 // ── OTP box: auto-tab forward and backward ────────────────────────────────────
 function moveToNext(current) {
+    if (!current) return;
     if (current.value.length >= current.maxLength) {
         const next = current.nextElementSibling;
         if (next && next.tagName === 'INPUT') next.focus();
@@ -923,6 +925,36 @@ function moveToNext(current) {
     }
 }
 window.moveToNext = moveToNext;
+
+// Wire up events in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // ── Navigation Buttons ───────────────────────────────────────────────
+    const loginNav = document.getElementById('go-to-login-btn');
+    if (loginNav) loginNav.addEventListener('click', () => goToScreen('login-screen'));
+
+    const regNav = document.getElementById('go-to-register-btn');
+    if (regNav) regNav.addEventListener('click', () => window.location.href = 'registration.html');
+
+    // ── Auth Action Buttons ──────────────────────────────────────────────
+    const loginSubmit = document.getElementById('login-submit-btn');
+    if (loginSubmit) loginSubmit.addEventListener('click', handleLogin);
+
+    const otpVerify = document.getElementById('otp-verify-btn');
+    if (otpVerify) otpVerify.addEventListener('click', handleLoginOTP);
+
+    // ── Role Cards ───────────────────────────────────────────────────────
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const role = card.querySelector('h3').innerText;
+            selectRole(role);
+        });
+    });
+
+    // ── OTP Boxes (already have onkeyup but we'll add robust focus) ─────
+    document.querySelectorAll('.otp-box').forEach(box => {
+        box.addEventListener('keyup', (e) => moveToNext(e.target));
+    });
+});
 
 // ── [NFR-5.3 / FR-7.1] Logout: clear session, sign out, notify ───────────────
 // SRS NFR-5.3: "sessions expire after 30 minutes" — manual logout also clears

@@ -471,7 +471,7 @@ function verifyRegistrationOTP() {
 
 
 // ─── KisanSetu | Registration — Supabase Migration ──────────────────────────
-import { supabase, uploadFile } from './supabase-config.js';
+import { getSupabase, uploadFile } from './supabase-config.js';
 import { sendSystemNotification } from './shared/notifications-manager.js';
 
 
@@ -718,6 +718,7 @@ async function verifyRegistrationOTP() {
         return;
     }
 
+    const supabase = await getSupabase();
     if (enteredOTP !== payload.otp && enteredOTP !== '1234') { 
         showRegToast('Incorrect OTP. Please try again.', 'error');
         return;
@@ -1216,10 +1217,29 @@ function initRegVoiceInterface() {
 
 // ── DOMContentLoaded: wire up OTP button + voice ──────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Input Listeners ───────────────────────────────────────────────────
+    const profileImg = document.getElementById('profileImage');
+    if (profileImg) profileImg.addEventListener('change', handleImageUpload);
+
+    // ── Button Listeners ──────────────────────────────────────────────────
+    const previewBtn = document.getElementById('preview-details-btn');
+    if (previewBtn) previewBtn.addEventListener('click', generatePreview);
+
+    const editBtn = document.getElementById('edit-form-btn');
+    if (editBtn) editBtn.addEventListener('click', editForm);
+
+    const confirmBtn = document.getElementById('confirm-submit-btn');
+    if (confirmBtn) confirmBtn.addEventListener('click', finalSubmit);
+
     const finalBtn = document.getElementById('final-verify-btn');
-    if (finalBtn) {
-        finalBtn.addEventListener('click', verifyRegistrationOTP);
-    }
+    if (finalBtn) finalBtn.addEventListener('click', verifyRegistrationOTP);
+
+    const resendBtn = document.getElementById('resend-otp-link');
+    if (resendBtn) resendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        resendOTP();
+    });
+
     initRegVoiceInterface();
 });
 

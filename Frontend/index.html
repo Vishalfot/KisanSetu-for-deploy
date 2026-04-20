@@ -122,11 +122,11 @@
             <div class="auth-group">
                 <p class="auth-prompt">Get Started</p>
                 <button class="primary-btn full-width" style="margin-bottom: 15px;"
-                    onclick="goToScreen('login-screen')">
+                    id="go-to-login-btn">
                     <i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i>Login
                 </button>
                 <button class="accent-btn full-width"
-                    onclick="window.location.href='registration.html'">
+                    id="go-to-register-btn">
                     <i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i>Register
                 </button>
             </div>
@@ -149,7 +149,7 @@
             </div>
 
 
-            <button class="accent-btn full-width" onclick="handleLogin()">
+            <button class="accent-btn full-width" id="login-submit-btn">
                 <i class="fa-solid fa-shield-halved" style="margin-right: 8px;"></i>Secure Login
             </button>
         </div>
@@ -166,7 +166,7 @@
                 <input type="text" maxlength="1" class="otp-box" onkeyup="moveToNext(this)">
             </div>
 
-            <button class="accent-btn full-width" onclick="handleLoginOTP()">
+            <button class="accent-btn full-width" id="otp-verify-btn">
                 <i class="fa-solid fa-check" style="margin-right: 8px;"></i>Verify &amp; Proceed
             </button>
             <p class="resend-text" onclick="goToScreen('login-screen')">Wrong number? Go back.</p>
